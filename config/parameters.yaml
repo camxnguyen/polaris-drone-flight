@@ -1,0 +1,6 @@
+cat > config/parameters.yaml << 'EOF'
+# flight parameters
+flight:
+  takeoff_altitude: 50  # ft
+  follow_radius: 20     # ft
+  loiter_altitude: 50   # ft
