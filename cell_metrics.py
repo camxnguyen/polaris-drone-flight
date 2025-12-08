@@ -88,7 +88,7 @@ if __name__ == "__main__":
             print(f"  RSRQ: {rsrq} dB")
             print(f"  SNR:  {snr} dB")
 
-            is_poor, reasons = is_poor_signal(rssi, rsrp, rsrq, snr)
+            is_poor, reasons = is_poor_signal(rsrp, rsrq, snr)
 
             if is_poor:
                 poor_count += 1
