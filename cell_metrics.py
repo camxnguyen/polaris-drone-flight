@@ -1,6 +1,13 @@
 import subprocess
-import json
 import time
+
+# config / thresholds
+POLL_INTERVAL_SEC = 2.0     # how often to pull signal metrics
+POOR_DURATION_SEC = 30.0    # how long signal must be down before we trigger launch
+POOR_SAMPLES_REQ = int(POOR_DURATION_SEC / POLL_INTERVAL_SEC)   # number of consecutive bad samples needed
+RSRP_THRESH = -100.0        # reference signal received power
+RSRQ_THRESH = -15.0         # reference signal received quality
+SNR_THRESH = 7.0            # signal to noise ratio
 
 # run shell command
 def run(cmd): 
@@ -45,6 +52,21 @@ def read_signal(m):
 
     return rssi, rsrp, rsrq, snr
 
+# detect poor signal
+def is_poor_signal(rsrp, rsrq, snr):
+    reasons = []
+    if rsrp is not None and rsrp < RSRP_THRESH:
+        reasons.append(f"RSRP={rsrp} dBm < {RSRP_THRESH}")
+    if rsrq is not None and rsrq < RSRQ_THRESH:
+        reasons.append(f"RSRQ={rsrq} dB < {RSRQ_THRESH}")
+    if snr is not None and snr < SNR_THRESH:
+        reasons.append(f"SNR={snr} dB < {SNR_THRESH}")
+
+    return (len(reasons) > 0), reasons
+
+def trigger_launch():
+    print("\n Poor signal peristed - sending LAUNCH command")
+
 # main
 if __name__ == "__main__":
     modem = get_modem_index()
@@ -52,13 +74,41 @@ if __name__ == "__main__":
 
     enable_modem(modem)
 
-    # tiny delay just to let signal reporting populate
-    time.sleep(1)
+    time.sleep(1)       # tiny delay just to let signal reporting populate
 
-    rssi, rsrp, rsrq, snr = read_signal(modem)
+    poor_count = 0      # consecutive samples with poor signal
 
-    print("Cell metrics:")
-    print(f"  RSSI: {rssi} dBm")
-    print(f"  RSRP: {rsrp} dBm")
-    print(f"  RSRQ: {rsrq} dB")
-    print(f"  SNR:  {snr} dB")
+    try:
+        while True:
+            rssi, rsrp, rsrq, snr = read_signal(modem)
+
+            print("Cell metrics:")
+            print(f"  RSSI: {rssi} dBm")
+            print(f"  RSRP: {rsrp} dBm")
+            print(f"  RSRQ: {rsrq} dB")
+            print(f"  SNR:  {snr} dB")
+
+            is_poor, reasons = is_poor_signal(rssi, rsrp, rsrq, snr)
+
+            if is_poor:
+                poor_count += 1
+                print(f"  -> Signal classified as POOR (#{poor_count} / {POOR_SAMPLES_REQUIRED})")
+                print("     Reasons:")
+                for r in reasons:
+                    print("      -", r)
+
+                if poor_count >= POOR_SAMPLES_REQUIRED:
+                    trigger_launch()
+                    # after launch request, reset counter or break depending on behavior you want
+                    poor_count = 0
+                    # if you want one-shot launch then exit loop instead:
+                    # break
+            else:
+                if poor_count > 0:
+                    print("  -> Signal recovered, resetting poor counter.")
+                poor_count = 0
+
+            time.sleep(POLL_INTERVAL_SEC)
+
+     except KeyboardInterrupt:
+        print("\n[+] Stopped by user.")
