@@ -83,7 +83,7 @@ if __name__ == "__main__":
             rssi, rsrp, rsrq, snr = read_signal(modem)
 
             timestamp = time.strftime("%H:%M:%S")
-            print("\n[{timestamp}] Cell metrics:")
+            print(f"\n[{timestamp}] Cell metrics:")
             print(f"  RSSI: {rssi} dBm      RSRP: {rsrp} dBm        RSRQ: {rsrq} dB         SNR:  {snr} dB")
 
             is_poor, reasons = is_poor_signal(rsrp, rsrq, snr)
