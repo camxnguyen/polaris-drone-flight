@@ -90,12 +90,12 @@ if __name__ == "__main__":
 
             if is_poor:
                 poor_count += 1
-                print(f"  -> Signal classified as POOR (#{poor_count} / {POOR_SAMPLES_REQUIRED})")
+                print(f"  -> Signal classified as POOR (#{poor_count} / {POOR_SAMPLES_REQ})")
                 print("     Reasons:")
                 for r in reasons:
                     print("      -", r)
 
-                if poor_count >= POOR_SAMPLES_REQUIRED:
+                if poor_count >= POOR_SAMPLES_REQ:
                     trigger_launch()
                     # after launch request, reset counter or break depending on behavior you want
                     poor_count = 0
