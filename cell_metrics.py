@@ -75,14 +75,19 @@ if __name__ == "__main__":
     enable_modem(modem)
 
     time.sleep(1)       # tiny delay just to let signal reporting populate
-
+    start_time = None
     poor_count = 0      # consecutive samples with poor signal
+    total_readings = 0  
     history = []        # store all poor samples for summary
     #start_time = None   
 
     try:
         while True:
             rssi, rsrp, rsrq, snr = read_signal(modem)
+            total_readings += 1
+
+            if start_time is None:
+                start_time=time.time()
 
             timestamp = time.strftime("%H:%M:%S")
             print(f"\n[{timestamp}] Cell metrics:")
@@ -102,7 +107,7 @@ if __name__ == "__main__":
                     "reasons": reasons.copy(),
                     "timestamp": time.strftime("%H:%M:%S")
                 })
-                
+
                 print(f"  -> Signal classified as POOR (#{poor_count} / {POOR_SAMPLES_REQ})")
                 print("     Reasons:")
                 for r in reasons:
@@ -110,10 +115,8 @@ if __name__ == "__main__":
 
                 if poor_count >= POOR_SAMPLES_REQ:
                     trigger_launch()
-                    # after launch request, reset counter or break depending on behavior you want
                     poor_count = 0
-                    # if you want one-shot launch then exit loop instead:
-                    # break
+                    
             else:
                 if poor_count > 0:
                     print("  -> Signal recovered, resetting poor signal counter.")
@@ -123,8 +126,10 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print("\n==================== SUMMARY ====================")
-        print(f"Total poor-signal readings: {len(history)}\n")
-
+        print(f"   Runtime (active monitoring): {hrs:02d}:{mins:02d}:{secs:02d}")
+        print(f"   Total signal readings:       {total_readings}")
+        print(f"   Poor-signal readings:        {len(history)}\n")
+        
         for i, h in enumerate(history, 1):
             print(f"[{i}] Time: {h['timestamp']}")
             print(f"     RSSI={h['RSSI']} / RSRP={h['RSRP']} / "
