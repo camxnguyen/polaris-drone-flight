@@ -110,5 +110,5 @@ if __name__ == "__main__":
 
             time.sleep(POLL_INTERVAL_SEC)
 
-     except KeyboardInterrupt:
+    except KeyboardInterrupt:
         print("\n[+] Stopped by user.")
