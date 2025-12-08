@@ -125,11 +125,20 @@ if __name__ == "__main__":
             time.sleep(POLL_INTERVAL_SEC)
 
     except KeyboardInterrupt:
+        end_time = time.time()
+        if start_time is not None:
+            total_seconds = int(end_time - start_time)
+        else:
+            total_seconds = 0
+
+        hrs, rem = divmod(total_seconds, 3600)
+        mins, secs = divmod(rem, 60)
+
         print("\n==================== SUMMARY ====================")
         print(f"   Runtime (active monitoring): {hrs:02d}:{mins:02d}:{secs:02d}")
         print(f"   Total signal readings:       {total_readings}")
         print(f"   Poor-signal readings:        {len(history)}\n")
-        
+
         for i, h in enumerate(history, 1):
             print(f"[{i}] Time: {h['timestamp']}")
             print(f"     RSSI={h['RSSI']} / RSRP={h['RSRP']} / "
