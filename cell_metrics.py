@@ -92,6 +92,17 @@ if __name__ == "__main__":
 
             if is_poor:
                 poor_count += 1
+
+                # save history entry
+                history.append({
+                    "RSSI": rssi,
+                    "RSRP": rsrp,
+                    "RSRQ": rsrq,
+                    "SNR": snr,
+                    "reasons": reasons.copy(),
+                    "timestamp": time.strftime("%H:%M:%S")
+                })
+                
                 print(f"  -> Signal classified as POOR (#{poor_count} / {POOR_SAMPLES_REQ})")
                 print("     Reasons:")
                 for r in reasons:
