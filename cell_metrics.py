@@ -77,6 +77,8 @@ if __name__ == "__main__":
     time.sleep(1)       # tiny delay just to let signal reporting populate
 
     poor_count = 0      # consecutive samples with poor signal
+    history = []        # store all poor samples for summary
+    #start_time = None   
 
     try:
         while True:
@@ -103,10 +105,23 @@ if __name__ == "__main__":
                     # break
             else:
                 if poor_count > 0:
-                    print("  -> Signal recovered, resetting poor counter.")
+                    print("  -> Signal recovered, resetting poor signal counter.")
                 poor_count = 0
 
             time.sleep(POLL_INTERVAL_SEC)
 
     except KeyboardInterrupt:
-        print("\n[+] Stopped by user.")
+        print("\n==================== SUMMARY ====================")
+        print(f"Total poor-signal readings: {len(history)}\n")
+
+        for i, h in enumerate(history, 1):
+            print(f"[{i}] Time: {h['timestamp']}")
+            print(f"     RSSI={h['RSSI']} / RSRP={h['RSRP']} / "
+                  f"RSRQ={h['RSRQ']} / SNR={h['SNR']}")
+            print("     Reasons:")
+            for r in h["reasons"]:
+                print(f"       - {r}")
+            print()
+
+        print("=================================================\n")
+        print("[+] Monitoring stopped by user.\n")
