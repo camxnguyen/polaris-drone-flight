@@ -82,11 +82,9 @@ if __name__ == "__main__":
         while True:
             rssi, rsrp, rsrq, snr = read_signal(modem)
 
-            print("Cell metrics:")
-            print(f"  RSSI: {rssi} dBm")
-            print(f"  RSRP: {rsrp} dBm")
-            print(f"  RSRQ: {rsrq} dB")
-            print(f"  SNR:  {snr} dB")
+            timestamp = time.strftime("%H:%M:%S")
+            print("\n[{timestamp}] Cell metrics:")
+            print(f"  RSSI: {rssi} dBm      RSRP: {rsrp} dBm        RSRQ: {rsrq} dB         SNR:  {snr} dB")
 
             is_poor, reasons = is_poor_signal(rsrp, rsrq, snr)
 
